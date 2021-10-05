@@ -3,56 +3,81 @@ const User = require("../models/User");
 const Response = require('../utils/response');
 const Mail = require('../utils/mail');
 
-exports.register = async (req,res,next) => {
-    const {username, email, password} = req.body;
+exports.register = async (req, res, next) => {
+    console.log("request recieved");
+    let {
+        name,
+        username,
+        email,
+        password,
+        github,
+        techsatck,
+        tags
+    } = req.body;
 
     try {
+        tags = tags.toLocaleLowerCase();
+        tags = tags.split(",");
         const user = await User.create({
+            name,
             username,
             email,
-            password
+            password,
+            github,
+            techsatck,
+            tags
         });
-
         sendToken(user, 201, res);
-    } 
-    
-    catch(error) {
+        user.findOne({email : email}).
+        console.log("register success");
+    } catch (error) {
         next(error);
     }
 };
 
-exports.login = async (req,res,next) => {
-    const {email, password} = req.body;
-    if(!email || !password) {
+exports.login = async (req, res, next) => {
+    const {
+        email,
+        password
+    } = req.body;
+    if (!email || !password) {
         return next(new Response("Please enter email and password", 400));
     }
 
     try {
-        const user = await User.findOne({email}).select("+password");
-        if(!user) {
+        const user = await User.findOne({
+            email
+        }).select("+password");
+        if (!user) {
             return next(new Response("Email ID not found", 404));
         }
 
-        const isMatch =   await user.matchPasswords(password);
+        const isMatch = await user.matchPasswords(password);
 
-        if(!isMatch) {
+        if (!isMatch) {
             return next(new Response("Invalid Credentials", 401));
         }
 
         sendToken(user, 200, res);
-    } 
-    catch(error) {
-        res.status(500).json({success: true, error: error.message});
+    } catch (error) {
+        res.status(500).json({
+            success: true,
+            error: error.message
+        });
     }
 };
 
-exports.forgotpassword = async(req,res,next) => {
-    const {email} = req.body;
+exports.forgotpassword = async (req, res, next) => {
+    const {
+        email
+    } = req.body;
 
     try {
-        const user = await User.findOne({email});
- 
-        if(!user) {
+        const user = await User.findOne({
+            email
+        });
+
+        if (!user) {
             return next(new Response("Email could not be sent", 404));
         }
         const resetToken = user.getResetPasswordToken();
@@ -73,7 +98,10 @@ exports.forgotpassword = async(req,res,next) => {
                 text: message,
             });
 
-            res.status(200).json({success: true, data: "Email Sent"});
+            res.status(200).json({
+                success: true,
+                data: "Email Sent"
+            });
 
         } catch (error) {
             user.resetPasswordToken = undefined;
@@ -83,23 +111,24 @@ exports.forgotpassword = async(req,res,next) => {
             return next(new Response("Email could not be sent", 500));
         }
 
-    }
-    catch(error) {
+    } catch (error) {
         next(error);
     }
 
 };
 
-exports.resetpassword = async(req,res,next) => {
+exports.resetpassword = async (req, res, next) => {
     const resetPasswordToken = crypto.createHash("sha256").update(req.params.resetToken).digest("hex");
 
     try {
         const user = await User.findOne({
             resetPasswordToken,
-            resetPasswordExpire: { $gt: Date.now()}
+            resetPasswordExpire: {
+                $gt: Date.now()
+            }
         })
 
-        if(!user) {
+        if (!user) {
             return next(new Response("Invalid Reset Token", 400))
         }
 
@@ -119,5 +148,5 @@ exports.resetpassword = async(req,res,next) => {
 
 const sendToken = (user, statusCode, res) => {
     const token = user.getSignedToken();
-    res.status(statusCode).json({success: true, token});
+    return token;
 }
