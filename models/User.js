@@ -33,23 +33,23 @@ const UserSchema = new mongoose.Schema({
         select: false
     },
     github: {
-        type: string,
+        type: String,
         required: [false, " "],
         select: false
     },
     github: {
-        type: string,
+        type: String,
         required: [false, " "],
         select: false
     },
     techStack: {
-        type: string,
+        type: String,
         required: [true, "Please select your TechStack"],
         minlength: 3,
         select: false
     },
     techStack: {
-        type: string,
+        type: String,
         required: [true, "Please enter your Prefered Technologies"],
         minlength: 5,
         select: false
