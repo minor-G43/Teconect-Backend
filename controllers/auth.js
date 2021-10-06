@@ -16,7 +16,7 @@ exports.register = async (req, res, next) => {
     } = req.body;
 
     try {
-        tags = tags.toLocaleLowerCase();
+        tags = tags.toLowerCase();
         tags = tags.split(",");
         const user = await User.create({
             name,
