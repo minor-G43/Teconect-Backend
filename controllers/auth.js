@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const User = require("../models/User");
 const Response = require('../utils/response');
 const Mail = require('../utils/mail');
-
+var token;
 exports.register = async (req, res, next) => {
     console.log("request recieved");
     let username = req.body.username,
@@ -21,20 +21,21 @@ exports.register = async (req, res, next) => {
             email,
             password,
             PhoneNo,
-            token,
             github,
             techstack,
             tags
         });
+        token = sendToken(user, 201, res);
         res.status(201).send({
             status: 201,
             statusText: "register success",
-            token: sendToken(user, 201, res)
+            token: token
         })
         console.log("register success");
     } catch (error) {
         next(error);
     }
+    console.log(token);
 };
 
 exports.login = async (req, res, next) => {
@@ -59,8 +60,11 @@ exports.login = async (req, res, next) => {
         if (!isMatch) {
             return next(new Response("Invalid Credentials", 401));
         }
-
-        sendToken(user, 200, res);
+        res.status(201).json({
+            success: true,
+            token : sendToken(user, 200, res)
+        });
+        
     } catch (error) {
         res.status(500).json({
             success: true,

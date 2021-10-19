@@ -32,11 +32,11 @@ const UserSchema = new mongoose.Schema({
         maxlength: 10,
         select: false
     },
-    token: {
-        type: String,
-        required: [false, " "],
-        select: false
-    },
+    // token: {
+    //     type: String,
+    //     required: [false, " "],
+    //     select: false
+    // },
     github: {
         type: String,
         required: [false, " "],
