@@ -5,30 +5,32 @@ const Mail = require('../utils/mail');
 
 exports.register = async (req, res, next) => {
     console.log("request recieved");
-    let {
-        name,
-        username,
-        email,
-        password,
-        github,
-        techsatck,
-        tags
-    } = req.body;
-
+    let username = req.body.username,
+        email = req.body.email,
+        PhoneNo = req.body.PhoneNo,
+        password = req.body.password,
+        github = req.body.github,
+        techstack = req.body.techstack,
+        tags = req.body.tags;
+    token = "";
     try {
         tags = tags.toLowerCase();
         tags = tags.split(",");
         const user = await User.create({
-            name,
             username,
             email,
             password,
+            PhoneNo,
+            token,
             github,
-            techsatck,
+            techstack,
             tags
         });
-        sendToken(user, 201, res);
-        user.findOne({email : email}).
+        res.status(201).send({
+            status: 201,
+            statusText: "register success",
+            token: sendToken(user, 201, res)
+        })
         console.log("register success");
     } catch (error) {
         next(error);
@@ -58,6 +60,27 @@ exports.login = async (req, res, next) => {
             return next(new Response("Invalid Credentials", 401));
         }
 
+        sendToken(user, 200, res);
+    } catch (error) {
+        res.status(500).json({
+            success: true,
+            error: error.message
+        });
+    }
+};
+
+exports.loginToken = async (req, res, next) => {
+    const {
+        token
+    } = req.params.token;
+    console.log(req.params.token);
+    try {
+        const valid = await User.findOne({
+            token
+        })
+        if (!valid) {
+            return res.redirect("/login");
+        }
         sendToken(user, 200, res);
     } catch (error) {
         res.status(500).json({

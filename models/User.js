@@ -26,13 +26,13 @@ const UserSchema = new mongoose.Schema({
         select: false
     },
     PhoneNo: {
-        type: Number,
+        type: String,
         required: [true, "Please add a Phone Number"],
         minlength: 10,
         maxlength: 10,
         select: false
     },
-    github: {
+    token: {
         type: String,
         required: [false, " "],
         select: false
@@ -44,12 +44,12 @@ const UserSchema = new mongoose.Schema({
     },
     techStack: {
         type: String,
-        required: [true, "Please select your TechStack"],
+        required: [false, "Please select your TechStack"],
         minlength: 3,
         select: false
     },
-    techStack: {
-        type: String,
+    tags: {
+        type: Array,
         required: [true, "Please enter your Prefered Technologies"],
         minlength: 5,
         select: false
