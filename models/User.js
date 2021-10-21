@@ -32,11 +32,6 @@ const UserSchema = new mongoose.Schema({
         maxlength: 10,
         select: false
     },
-    // token: {
-    //     type: String,
-    //     required: [false, " "],
-    //     select: false
-    // },
     github: {
         type: String,
         required: [false, " "],
@@ -52,6 +47,18 @@ const UserSchema = new mongoose.Schema({
         type: Array,
         required: [true, "Please enter your Prefered Technologies"],
         minlength: 5,
+        select: false
+    },
+    project: {
+        type: String,
+        required: [true, "Please enter some of your previous works or contributions."],
+        minlength: 8,
+        select: false
+    },
+    description: {
+        type: String,
+        required: [false, ""],
+        minlength: 0,
         select: false
     },
     resetPasswordToken: String,

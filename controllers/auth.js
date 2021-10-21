@@ -2,16 +2,18 @@ const crypto = require('crypto');
 const User = require("../models/User");
 const Response = require('../utils/response');
 const Mail = require('../utils/mail');
-var token;
+const TokenSchema = require('../models/token');
+var token = "";
 exports.register = async (req, res, next) => {
-    console.log("request recieved");
     let username = req.body.username,
         email = req.body.email,
         PhoneNo = req.body.PhoneNo,
         password = req.body.password,
         github = req.body.github,
         techstack = req.body.techstack,
-        tags = req.body.tags;
+        tags = req.body.tags,
+        project = req.body.project,
+        description = req.body.description;
     token = "";
     try {
         tags = tags.toLowerCase();
@@ -23,9 +25,11 @@ exports.register = async (req, res, next) => {
             PhoneNo,
             github,
             techstack,
-            tags
+            tags,
+            project,
+            description
         });
-        token = sendToken(user, 201, res);
+        token = sendToken(user, 201, res, "signup");
         res.status(201).send({
             status: 201,
             statusText: "register success",
@@ -35,7 +39,6 @@ exports.register = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-    console.log(token);
 };
 
 exports.login = async (req, res, next) => {
@@ -62,9 +65,9 @@ exports.login = async (req, res, next) => {
         }
         res.status(201).json({
             success: true,
-            token : sendToken(user, 200, res)
+            token: sendToken(user, 201, res, "login")
         });
-        
+
     } catch (error) {
         res.status(500).json({
             success: true,
@@ -72,25 +75,50 @@ exports.login = async (req, res, next) => {
         });
     }
 };
-
 exports.loginToken = async (req, res, next) => {
-    const {
-        token
-    } = req.params.token;
-    console.log(req.params.token);
+    const reqtoken = req.params.token;
+    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxNzE0MWYxMTZlYTZlZDk4ZDJkMzMwYyIsImlhdCI6MTYzNDgxMjQwMSwiZXhwIjoxNjM0ODEzMDAxfQ.zYJAF9_2pSnyoeYft1JyJib9yLJ8_fa7G84_PK2UlEc
+    // {
+    //     "username" : "somya",
+    //     "email"  :"somyaupta@gmail.com",
+    //     "password" : "jkhgfddkd",
+    //     "PhoneNo" : "0987654321",
+    //     "github" : "bmfbjhff",
+    //     "techstack" : "iouytr",
+    //     "tags" : "oiuytr,khjghgfdf",
+    //     "project" : "yutuytui",
+    //     "description" : ""
+    //   }
     try {
-        const valid = await User.findOne({
-            token
-        })
-        if (!valid) {
-            return res.redirect("/login");
+        let verify = await tokenFound(reqtoken);
+        console.log(verify);
+        if (!verify && (reqtoken == token)) {
+            await saveToken(reqtoken);
+            console.log("token saved");
+            return res.status(201).json({
+                success: true,
+                token: reqtoken
+            });
+        } else if (verify) {
+            return res.status(201).json({
+                success: true,
+                token: reqtoken
+            });
+
+        } else {
+            return res.status(401).json({
+                success: false,
+                token: reqtoken,
+                error: "not a valid token"
+            });
         }
-        sendToken(user, 200, res);
     } catch (error) {
         res.status(500).json({
             success: true,
             error: error.message
         });
+    }finally{
+        token = "delete token"
     }
 };
 
@@ -173,7 +201,24 @@ exports.resetpassword = async (req, res, next) => {
     }
 };
 
-const sendToken = (user, statusCode, res) => {
+const sendToken = (user, statusCode, res, type) => {
     const token = user.getSignedToken();
     return token;
+}
+const saveToken = async (reqtoken) => {
+    let saved = new TokenSchema({
+        token: reqtoken
+    });
+    return reqtoken;
+}
+const tokenFound = async (reqtoken) => {
+    TokenSchema.findOne({
+        token: reqtoken
+    }).then(res => {
+        if (res != null) {
+            return true;
+        } else {
+            return false;
+        }
+    })
 }
