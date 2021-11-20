@@ -15,9 +15,6 @@ connectDB();
 require('./controllers/auth').friendConnection(io);
 
 app.use(express.json());
-app.use("/", (req, res, next) => {
-    res.sendFile(path.join(__dirname ,"./index.html"))
-})
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/private', require('./routes/private'));
 
