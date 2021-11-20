@@ -1,8 +1,11 @@
 const crypto = require('crypto');
-const User = require("../models/User");
 const Response = require('../utils/response');
 const Mail = require('../utils/mail');
-const TokenSchema = require('../models/token');
+
+//Models
+const User = require("../models/User");
+const Token = require('../models/token');
+const Connection = require('../models/connections');
 var token = "";
 exports.register = async (req, res, next) => {
     let username = req.body.username,
@@ -15,6 +18,7 @@ exports.register = async (req, res, next) => {
         project = req.body.project,
         description = req.body.description;
     token = "";
+    let resetpassword = "";
     try {
         tags = tags.toLowerCase();
         tags = tags.split(",");
@@ -29,7 +33,13 @@ exports.register = async (req, res, next) => {
             project,
             description
         });
-        token = sendToken(user, 201, res, "signup");
+        token = await sendToken(user, 201, "signup", "");
+        const TokenSchema = await Token.create({
+            token
+        })
+        const ConnectDb = await Connection.create({
+            user: user._id
+        });
         res.status(201).send({
             status: 201,
             statusText: "register success",
@@ -57,16 +67,25 @@ exports.login = async (req, res, next) => {
         if (!user) {
             return next(new Response("Email ID not found", 404));
         }
-
+        console.log(user);
         const isMatch = await user.matchPasswords(password);
 
         if (!isMatch) {
             return next(new Response("Invalid Credentials", 401));
         }
-        res.status(201).json({
-            success: true,
-            token: sendToken(user, 201, res, "login")
-        });
+        await Token.findOne(user._id).then(async result => {
+            if (result != null) {
+                return res.status(201).json({
+                    success: true,
+                    token: result.token
+                });
+            } else {
+                return res.status(401).json({
+                    success: false,
+                    token: {}
+                });
+            }
+        })
 
     } catch (error) {
         res.status(500).json({
@@ -80,7 +99,7 @@ exports.loginToken = async (req, res, next) => {
     // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxNzE0MWYxMTZlYTZlZDk4ZDJkMzMwYyIsImlhdCI6MTYzNDgxMjQwMSwiZXhwIjoxNjM0ODEzMDAxfQ.zYJAF9_2pSnyoeYft1JyJib9yLJ8_fa7G84_PK2UlEc
     // {
     //     "username" : "somya",
-    //     "email"  :"somyaupta@gmail.com",
+    // "email"  :"somyaupta@gmail.com",
     //     "password" : "jkhgfddkd",
     //     "PhoneNo" : "0987654321",
     //     "github" : "bmfbjhff",
@@ -90,34 +109,31 @@ exports.loginToken = async (req, res, next) => {
     //     "description" : ""
     //   }
     try {
-        let verify = await tokenFound(reqtoken);
-        console.log(verify);
-        if (!verify && (reqtoken == token)) {
-            await saveToken(reqtoken);
-            console.log("token saved");
-            return res.status(201).json({
-                success: true,
-                token: reqtoken
-            });
-        } else if (verify) {
-            return res.status(201).json({
-                success: true,
-                token: reqtoken
-            });
-
-        } else {
+        let verify;
+        verify = await tokenFound(reqtoken);
+        if (verify != true) {
             return res.status(401).json({
                 success: false,
                 token: reqtoken,
                 error: "not a valid token"
             });
+            // return res.status(401).json({
+            //     success: false,
+            //     token: ""
+            // });
+        } else if (verify == true) {
+            return res.status(201).json({
+                success: true,
+                token: reqtoken
+            });
+
         }
     } catch (error) {
         res.status(500).json({
             success: true,
             error: error.message
         });
-    }finally{
+    } finally {
         token = "delete token"
     }
 };
@@ -138,22 +154,25 @@ exports.forgotpassword = async (req, res, next) => {
         const resetToken = user.getResetPasswordToken();
         await user.save();
 
-        const resetUrl = `http://localhost:3000/password-reset/${resetToken}`;
+        // const resetUrl = `http://localhost:5000/api/auth/password-reset/${resetToken}`;
 
         const message = `
-            <h1>You have requested a password reset</h1>
+            <h1>You have requestid a password reset</h1>
             <p>Please go to this link to reset your password</p>
-            <a href=${resetUrl} clicktracking=off>${resetUrl}</a>
+            <form method="POST" action="https://tconect-front.herokuapp.com/forgotpassword/${resetToken}">
+            <input type="hidden" name="_method" value="put" />
+            <button type="submit"> Click Here</button>
+            </form>
         `;
 
         try {
             await Mail({
                 to: user.email,
                 subject: "Password Reset Request",
-                text: message,
+                html: message,
             });
 
-            res.status(200).json({
+            return res.status(200).json({
                 success: true,
                 data: "Email Sent"
             });
@@ -171,6 +190,7 @@ exports.forgotpassword = async (req, res, next) => {
     }
 
 };
+
 
 exports.resetpassword = async (req, res, next) => {
     const resetPasswordToken = crypto.createHash("sha256").update(req.params.resetToken).digest("hex");
@@ -201,24 +221,170 @@ exports.resetpassword = async (req, res, next) => {
     }
 };
 
-const sendToken = (user, statusCode, res, type) => {
+exports.fetchProfile = async (req, res, next) => {
+    const {
+        email
+    } = req.body;
+    const {
+        token
+    } = req.params
+    var userData;
+    if (tokenFound(token)) {
+
+        try {
+            userData = await User.findOne({
+                email
+            });
+        } catch {
+            return res.status(500).send({
+                "success": false
+            })
+        }
+        return res.status(201).send({
+            "success": true,
+            data: userData
+        })
+    } else {
+        return res.status(401).send({
+            "success": false
+        })
+    }
+
+}
+exports.userList = async (req, res, next) => {
+    let {
+        authToken
+    } = req.params;
+    let status = await tokenFound(authToken);
+    if (status == true) {
+        User.find({}).then((result) => {
+            // result.json().then(r =>{
+            //     console.log(r);
+            // })
+            res.status(200).send({
+                data: result
+            })
+        }).catch((err) => {
+            res.status(500).send({
+                error: "Internal server error"
+            })
+        });
+    } else {
+        res.status(401).send({
+            error: "UnAuthorise request"
+        })
+    }
+}
+exports.friendConnection = async (io) => {
+    io.on('connection', async (socket) => {
+        // console.log('A user is connected');
+        socket.on("join", async (token) => {
+            let id = await Token.findOne(token);
+            socket.userid = id.user
+            console.log(socket.userid);
+        })
+        socket.on('friendrequest', async (requestid) => {
+            console.log(socket.userid);
+            await Connection.findOneAndUpdate({
+                user: socket.userid
+            }, {
+                $push: {
+                    outrequest: socket.userid
+                }
+            })
+            await Connection.findOneAndUpdate({
+                user: requestid
+            }, {
+                $push: {
+                    inrequest: requestid
+                }
+            })
+            io.to(requestid).emit('newFriendRequest', {
+                from: socket.userid,
+                to: requestid
+            });
+        });
+        socket.on("accept", async (senderid) => {
+
+            await Connection.findOneAndUpdate({
+                user: socket.userid
+            }, {
+                $pull: {
+                    outrequest: {
+                        $eleMatch: socket.userid
+                    }
+                },
+                $push: {
+                    friend: senderid
+                }
+            })
+            await Connection.findOneAndUpdate({
+                user: senderid
+            }, {
+                $pull: {
+                    friend: {
+                        $eleMatch: socket.userid
+                    }
+                },
+                $push: {
+                    inrequest: requestid
+                }
+            })
+            io.to(senderid).emit('newfriendcreated', {
+                from: socket.userid,
+                to: requestid
+            });
+        })
+        socket.on("cancel", async (senderid) => {
+            await Connection.findOneAndUpdate({
+                user: socket.userid
+            }, {
+                $pull: {
+                    outrequest: {
+                        $eleMatch: socket.userid
+                    }
+                }
+            })
+            await Connection.findOneAndUpdate({
+                user: senderid
+            }, {
+                $pull: {
+                    friend: socket.userid
+                }
+            });
+            io.to(senderid).emit('newfrienddenied', {
+                from: socket.userid,
+                to: requestid
+            });
+        });
+    });
+}
+
+
+const sendToken = async (user, statusCode, res, email) => {
     const token = user.getSignedToken();
+    if (res != "signup") {
+        await saveToken(token, email);
+    }
     return token;
 }
-const saveToken = async (reqtoken) => {
-    let saved = new TokenSchema({
+const saveToken = async (reqtoken, email) => {
+    let user = await User.findOne({
+        email
+    })
+    Token.findOne(user._id).updateOne({
         token: reqtoken
     });
+    console.log("saved token");
     return reqtoken;
 }
 const tokenFound = async (reqtoken) => {
-    TokenSchema.findOne({
-        token: reqtoken
-    }).then(res => {
-        if (res != null) {
-            return true;
-        } else {
-            return false;
-        }
+    let res = await Token.findOne({
+        reqtoken
     })
+    if (res.token != null) {
+        return true;
+    } else {
+        return false;
+    }
 }
