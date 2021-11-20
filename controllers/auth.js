@@ -246,7 +246,8 @@ exports.fetchProfile = async (req, res, next) => {
         })
     } else {
         return res.status(401).send({
-            "success": false
+            "success": false,
+            "error" : "Unauthorised request"
         })
     }
 
