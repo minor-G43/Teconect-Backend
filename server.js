@@ -1,24 +1,32 @@
-require('dotenv').config({path: './config.env'});
+require('dotenv').config({
+    path: './config.env'
+});
 const express = require('express');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
-
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const io = require('socket.io')(server);
+const path = require('path');
 connectDB();
 
-const app = express();
+// activating socket
+require('./controllers/auth').friendConnection(io);
 
 app.use(express.json());
-
+app.use("/", (req, res, next) => {
+    res.sendFile(path.join(__dirname ,"./index.html"))
+})
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/private', require('./routes/private'));
 
 app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
+server.listen(port, () => console.log(`Server is listening on port ${port}`));
 
-const server = app.listen(port, () => console.log(`Server is listening on port ${port}`));
-
-process.on("unhandledRejection", (err,promise) => {
+process.on("unhandledRejection", (err, promise) => {
     console.log(`Error: ${err}`);
     server.close(() => process.exit(1));
-});   
+});
