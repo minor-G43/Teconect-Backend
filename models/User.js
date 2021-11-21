@@ -30,36 +30,30 @@ const UserSchema = new mongoose.Schema({
         required: [true, "Please add a Phone Number"],
         minlength: 10,
         maxlength: 10,
-        select: false
     },
     github: {
         type: String,
         required: [false, " "],
-        select: false
     },
     techStack: {
         type: String,
         required: [false, "Please select your TechStack"],
         minlength: 3,
-        select: false
     },
     tags: {
         type: Array,
         required: [true, "Please enter your Prefered Technologies"],
         minlength: 5,
-        select: false
     },
     project: {
         type: String,
         required: [true, "Please enter some of your previous works or contributions."],
         minlength: 8,
-        select: false
     },
     description: {
         type: String,
         required: [false, ""],
         minlength: 0,
-        select: false
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date,

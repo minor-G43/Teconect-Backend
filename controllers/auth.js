@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const Response = require('../utils/response');
 const Mail = require('../utils/mail');
-
+const mongoose = require('mongoose');
 //Models
 const User = require("../models/User");
 const Token = require('../models/token');
@@ -68,7 +68,6 @@ exports.login = async (req, res, next) => {
         if (!user) {
             return next(new Response("Email ID not found", 404));
         }
-        console.log(user);
         const isMatch = await user.matchPasswords(password);
 
         if (!isMatch) {
@@ -224,18 +223,15 @@ exports.resetpassword = async (req, res, next) => {
 
 exports.fetchProfile = async (req, res, next) => {
     const {
-        email
-    } = req.body;
-    const {
-        token
+        authtoken
     } = req.params
     var userData;
-    let result = await tokenFound(token);
+    let result = await tokenFound(authtoken);
     if (result != false) {
 
         try {
             userData = await User.findOne({
-                _id: result.user
+                _id: result
             });
         } catch {
             return res.status(500).send({
@@ -276,7 +272,7 @@ exports.userList = async (req, res, next) => {
     }
 }
 exports.friendConnection = (io) => {
-    io.on('connection',  (socket) => {
+    io.on('connection', (socket) => {
         console.log('A user is connected');
         socket.on("join", async (token) => {
             let id = await Token.findOne(token);
@@ -379,12 +375,12 @@ const saveToken = async (reqtoken, email) => {
     return reqtoken;
 }
 const tokenFound = async (reqtoken) => {
-    let res = await Token.findOne({
-        reqtoken
+    let data = await Token.findOne({
+        token: reqtoken
     })
-    console.log(res);
-    if (res.token != null) {
-        return res;
+    if (data != null) {
+        let str = mongoose.Types.ObjectId(data.user);
+        return str;
     } else {
         return false;
     }
