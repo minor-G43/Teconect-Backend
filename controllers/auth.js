@@ -35,7 +35,8 @@ exports.register = async (req, res, next) => {
         });
         token = await sendToken(user, 201, "signup", "");
         const TokenSchema = await Token.create({
-            token
+            user: user._id,
+            token: token
         })
         const ConnectDb = await Connection.create({
             user: user._id
@@ -111,7 +112,7 @@ exports.loginToken = async (req, res, next) => {
     try {
         let verify;
         verify = await tokenFound(reqtoken);
-        if (verify != true) {
+        if (verify == false) {
             return res.status(401).json({
                 success: false,
                 token: reqtoken,
@@ -121,7 +122,7 @@ exports.loginToken = async (req, res, next) => {
             //     success: false,
             //     token: ""
             // });
-        } else if (verify == true) {
+        } else {
             return res.status(201).json({
                 success: true,
                 token: reqtoken
@@ -229,11 +230,12 @@ exports.fetchProfile = async (req, res, next) => {
         token
     } = req.params
     var userData;
-    if (tokenFound(token)) {
+    let result = await tokenFound(token);
+    if (result != false) {
 
         try {
             userData = await User.findOne({
-                email
+                _id: result.user
             });
         } catch {
             return res.status(500).send({
@@ -247,7 +249,7 @@ exports.fetchProfile = async (req, res, next) => {
     } else {
         return res.status(401).send({
             "success": false,
-            "error" : "Unauthorised request"
+            "error": "Unauthorised request"
         })
     }
 
@@ -257,12 +259,9 @@ exports.userList = async (req, res, next) => {
         authToken
     } = req.params;
     let status = await tokenFound(authToken);
-    if (status == true) {
+    if (status != false) {
         User.find({}).then((result) => {
-            // result.json().then(r =>{
-            //     console.log(r);
-            // })
-            res.status(200).send({
+            return res.status(200).send({
                 data: result
             })
         }).catch((err) => {
@@ -272,13 +271,13 @@ exports.userList = async (req, res, next) => {
         });
     } else {
         res.status(401).send({
-            error: "UnAuthorise request"
+            error: "Unauthorised request"
         })
     }
 }
-exports.friendConnection = async (io) => {
-    io.on('connection', async (socket) => {
-        // console.log('A user is connected');
+exports.friendConnection = (io) => {
+    io.on('connection',  (socket) => {
+        console.log('A user is connected');
         socket.on("join", async (token) => {
             let id = await Token.findOne(token);
             socket.userid = id.user
@@ -383,8 +382,9 @@ const tokenFound = async (reqtoken) => {
     let res = await Token.findOne({
         reqtoken
     })
+    console.log(res);
     if (res.token != null) {
-        return true;
+        return res;
     } else {
         return false;
     }
