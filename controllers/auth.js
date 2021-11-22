@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 //Models
 const User = require("../models/User");
 const Token = require('../models/token');
+const Project = require('../models/project');
 const Connection = require('../models/connections');
 var token = "";
 exports.register = async (req, res, next) => {
@@ -38,6 +39,7 @@ exports.register = async (req, res, next) => {
             user: user._id,
             token: token
         })
+
         const ConnectDb = await Connection.create({
             user: user._id
         });
@@ -357,6 +359,68 @@ exports.friendConnection = (io) => {
 }
 
 
+exports.createProject = async (req, res, next) => {
+    const {
+        authToken
+    } = req.params
+    const {
+        title,
+        url,
+        des
+    } = req.body;
+    let identifyUser = await tokenFound(authToken, true);
+    if (identifyUser != false) {
+        try {
+            let id = (identifyUser.user);
+            let projectRespone = await Project.create({
+                ownerid: id,
+                title: title,
+                url: url,
+                description: des
+            })
+            console.log(projectRespone);
+            res.status(201).send({
+                "success": true,
+                "data": projectRespone
+            })
+        } catch {
+            err => {
+                res.status(500).send({
+                    "success": false,
+                    "error": err
+                })
+            }
+        }
+    } else {
+        req.status(401).send({
+            "success": false,
+            "error": "Unauthorised"
+        })
+    }
+}
+exports.fetchProject = async (req, res, next) => {
+    const {
+        authToken
+    } = req.params
+    let identifyUser = await tokenFound(authToken);
+    if (identifyUser != false) {
+        try {
+            let projectRespone = await Project.find({});
+            res.status(201).send({
+                "success": true,
+                "data": projectRespone
+            })
+        } catch {
+            (err) => {
+                res.status(500).send({
+                    "success": false,
+                    "error": err
+                })
+            }
+        }
+    }
+}
+
 const sendToken = async (user, statusCode, res, email) => {
     const token = user.getSignedToken();
     if (res != "signup") {
@@ -374,11 +438,14 @@ const saveToken = async (reqtoken, email) => {
     console.log("saved token");
     return reqtoken;
 }
-const tokenFound = async (reqtoken) => {
+const tokenFound = async (reqtoken, extra = false) => {
     let data = await Token.findOne({
         token: reqtoken
     })
     if (data != null) {
+        if (extra == true) {
+            return data;
+        }
         let str = mongoose.Types.ObjectId(data.user);
         return str;
     } else {

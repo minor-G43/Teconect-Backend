@@ -18,4 +18,8 @@ router.route('/password-reset/:resetToken').post(part.resetpassword);
 
 router.route('/userlist/:authToken').post(part.userList);
 
+router.route('/createproject/:authToken').post(part.createProject);
+
+router.route('/fetchproject/:authToken').post(part.fetchProject);
+
 module.exports = router;
