@@ -5,4 +5,4 @@
 config.env
 
 #firebase config
-./config/config.json
+config.json
