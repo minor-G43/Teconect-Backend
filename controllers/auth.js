@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const Response = require('../utils/response');
 const Mail = require('../utils/mail');
 const mongoose = require('mongoose');
+//FireStore
+const CreateCollection = require('../firestore/config');
 //Models
 const User = require("../models/User");
 const Token = require('../models/token');
@@ -19,7 +21,6 @@ exports.register = async (req, res, next) => {
         project = req.body.project,
         description = req.body.description;
     token = "";
-    let resetpassword = "";
     try {
         tags = tags.toLowerCase();
         tags = tags.split(",");
@@ -35,14 +36,17 @@ exports.register = async (req, res, next) => {
             description
         });
         token = await sendToken(user, 201, "signup", "");
-        const TokenSchema = await Token.create({
-            user: user._id,
+        let id = user._id
+        await Token.create({
+            user: id,
             token: token
         })
-
-        const ConnectDb = await Connection.create({
-            user: user._id
+        await Connection.create({
+            user: id
         });
+        // create schema for new user
+        let status = await CreateCollection(id);
+        console.log(status.path);
         res.status(201).send({
             status: 201,
             statusText: "register success",
@@ -53,6 +57,8 @@ exports.register = async (req, res, next) => {
         next(error);
     }
 };
+
+
 
 exports.login = async (req, res, next) => {
     const {
