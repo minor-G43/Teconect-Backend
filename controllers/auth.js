@@ -11,17 +11,17 @@ const Project = require('../models/project');
 const Connection = require('../models/connections');
 var token = "";
 exports.register = async (req, res, next) => {
-    let username = req.body.username,
-        email = req.body.email,
-        PhoneNo = req.body.PhoneNo,
-        password = req.body.password,
-        github = req.body.github,
-        techstack = req.body.techstack,
-        tags = req.body.tags,
-        project = req.body.project,
-        description = req.body.description;
-    token = "";
     try {
+        let username = req.body.username,
+            email = req.body.email,
+            PhoneNo = req.body.PhoneNo,
+            password = req.body.password,
+            github = req.body.github,
+            techstack = req.body.techstack,
+            tags = req.body.tags,
+            project = req.body.project,
+            description = req.body.description;
+        token = "";
         tags = tags.toLowerCase();
         tags = tags.split(",");
         const user = await User.create({
@@ -41,6 +41,7 @@ exports.register = async (req, res, next) => {
             user: id,
             token: token
         })
+        id = id.toString();
         await Connection.create({
             user: id
         });
