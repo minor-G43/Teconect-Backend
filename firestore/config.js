@@ -1,9 +1,8 @@
 var admin = require("firebase-admin");
 
-var serviceAccount = process.env.Google_Config;
-
+var service = process.env.Google_Config;
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(JSON.parse(service))
 })
 
 const db = admin.firestore();
