@@ -8,7 +8,7 @@ admin.initializeApp({
 const db = admin.firestore();
 
 const CreateCollection = async (userid) => {
-    return await db.collection(`${userid}`).doc("collection").add({
+    return await db.collection(`${userid}`).doc("collection").set({
         friend: [],
         inreq: [],
         outreq: []

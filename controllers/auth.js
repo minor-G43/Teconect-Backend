@@ -47,7 +47,7 @@ exports.register = async (req, res, next) => {
         });
         // create schema for new user
         let status = await CreateCollection(id);
-        console.log(status.path);
+        // console.log(status.path);
         res.status(201).send({
             status: 201,
             statusText: "register success",
