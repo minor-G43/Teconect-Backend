@@ -105,7 +105,6 @@ exports.login = async (req, res, next) => {
 };
 exports.loginToken = async (req, res, next) => {
     const reqtoken = req.params.token;
-    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxNzE0MWYxMTZlYTZlZDk4ZDJkMzMwYyIsImlhdCI6MTYzNDgxMjQwMSwiZXhwIjoxNjM0ODEzMDAxfQ.zYJAF9_2pSnyoeYft1JyJib9yLJ8_fa7G84_PK2UlEc
     // {
     //     "username" : "somya",
     // "email"  :"somyaupta@gmail.com",
@@ -372,16 +371,19 @@ exports.createProject = async (req, res, next) => {
     } = req.params
     const {
         title,
+        tags,
         url,
         des
     } = req.body;
     let identifyUser = await tokenFound(authToken, true);
     if (identifyUser != false) {
+        tags = tags.split(",");
         try {
             let id = (identifyUser.user);
             let projectRespone = await Project.create({
                 ownerid: id,
                 title: title,
+                tags : tags,
                 url: url,
                 description: des
             })

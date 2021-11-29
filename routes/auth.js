@@ -6,6 +6,8 @@ const part = require('../controllers/auth');
 
 router.route('/register').post(part.register);
 
+router.route('/mobile/:authToken').post(part.register);
+
 router.route('/login/:token').post(part.loginToken);
 
 router.route('/login').post(part.login);
