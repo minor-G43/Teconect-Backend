@@ -82,8 +82,9 @@ exports.login = async (req, res, next) => {
         if (!isMatch) {
             return next(new Response("Invalid Credentials", 401));
         }
-        await Token.findOne(user._id).then(async result => {
+        await Token.findOne({user: user._id}).then(result => {
             if (result != null) {
+                console.log(result);
                 return res.status(201).json({
                     success: true,
                     token: result.token
@@ -116,6 +117,7 @@ exports.loginToken = async (req, res, next) => {
     //     "project" : "yutuytui",
     //     "description" : ""
     //   }
+    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxYTRjZGQ5ODQ4NTZiNTE3NGUyMDMzZiIsImlhdCI6MTYzODE5MDU1MywiZXhwIjoxNjM4MTkxMTUzfQ.tMjjSFcNDfjXMcmGpOU8hOBcQLEBxG1fVLHiKKcx_Zc
     try {
         let verify;
         verify = await tokenFound(reqtoken);
@@ -383,7 +385,7 @@ exports.createProject = async (req, res, next) => {
             let projectRespone = await Project.create({
                 ownerid: id,
                 title: title,
-                tags : tags,
+                tags: tags,
                 url: url,
                 description: des
             })
