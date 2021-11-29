@@ -17,11 +17,18 @@ server.listen(port, () => console.log(`Server is listening on port ${port}`));
 
 
 app.use(cors());
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+})
 app.use(express.json());
-app.use(express.urlencoded({extended : true}))
+app.use(express.urlencoded({
+    extended: true
+}))
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/private', require('./routes/private'));
-app.use("/api/school" ,require('./routes/school') )
+app.use("/api/school", require('./routes/school'))
 app.use(errorHandler);
 
 
