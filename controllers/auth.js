@@ -368,10 +368,10 @@ exports.friendConnection = (io) => {
 
 
 exports.createProject = async (req, res, next) => {
-    const {
+    let {
         authToken
     } = req.params
-    const {
+    let {
         title,
         tags,
         url,
