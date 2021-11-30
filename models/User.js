@@ -37,7 +37,7 @@ const UserSchema = new mongoose.Schema({
     },
     techStack: {
         type: String,
-        required: [false, "Please select your TechStack"],
+        required: [true, "Please select your TechStack"],
         minlength: 3
     },
     tags: {

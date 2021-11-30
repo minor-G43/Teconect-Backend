@@ -25,15 +25,15 @@ exports.register = async (req, res, next) => {
         tags = tags.toLowerCase();
         tags = tags.split(",");
         const user = await User.create({
-            username,
-            email,
-            password,
-            PhoneNo,
-            github,
-            techstack,
-            tags,
-            project,
-            description
+            username: username,
+            email: email,
+            password: password,
+            PhoneNo: PhoneNo,
+            github: github,
+            techStack: techstack,
+            tags: tags,
+            project: project,
+            description: description
         });
         token = await sendToken(user, 201, "signup", "");
         let id = user._id
@@ -82,7 +82,9 @@ exports.login = async (req, res, next) => {
         if (!isMatch) {
             return next(new Response("Invalid Credentials", 401));
         }
-        await Token.findOne({user: user._id}).then(result => {
+        await Token.findOne({
+            user: user._id
+        }).then(result => {
             if (result != null) {
                 console.log(result);
                 return res.status(201).json({
@@ -410,7 +412,7 @@ exports.createProject = async (req, res, next) => {
     }
 }
 exports.fetchProject = async (req, res, next) => {
-    const {
+    let {
         authToken
     } = req.params
     let identifyUser = await tokenFound(authToken);
