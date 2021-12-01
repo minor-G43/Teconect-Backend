@@ -186,9 +186,6 @@ exports.addattandence = async (req, res, next) => {
             date,
             attandence
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Attandence.create({
             name,
             reg,
