@@ -4,6 +4,20 @@ const Attandence = require('../../models/school/attandence');
 const Teacher = require('../../models/school/teacher');
 
 exports.registerStu = async (req, res, next) => {
+    // {
+    //     "name" : "somya" ,
+    //       "mname" : " " ,
+    //     "fname" : "uyw",
+    //     "reg" : "098765",
+    //     "pass" : "1234567890",
+    //     "date" : "7654",
+    //     "age" : "18",
+    //     "gender" : "M",
+    //     "cls" : "12",
+    //     "contact" : "098765432",
+    //     "address" : " kyiuyiuuiyi"
+    //   }
+
     try {
         let {
             name,
@@ -18,21 +32,18 @@ exports.registerStu = async (req, res, next) => {
             contact,
             address
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Student.create({
-            name,
-            mname,
-            fname,
-            reg,
-            pass,
-            date,
-            age,
-            gender,
-            cls,
-            contact,
-            address
+            name: name,
+            mname: mname,
+            fname: fname,
+            reg: reg,
+            pass: pass,
+            date: date,
+            age: age,
+            gender: gender,
+            cls: cls,
+            contact: contact,
+            address: address
         });
         console.log(user);
         res.status(201).send({
@@ -48,6 +59,18 @@ exports.registerStu = async (req, res, next) => {
     }
 };
 exports.registerTec = async (req, res, next) => {
+    // {
+    //     "name" : "somya",
+  	// 	"TID" : "97867",
+    //     "fname" : "uyw",
+    //     "pass" : "1234567890",
+    //     "date" : "7654",
+    //     "age" : "18",
+    //     "gender" : "M",
+  	// 	"course" : "jkhgfd",
+    //     "contact" : "098765432",
+    //     "address" : " kyiuyiuuiyi"
+    //   }
     try {
         let {
             name,
@@ -61,9 +84,6 @@ exports.registerTec = async (req, res, next) => {
             contact,
             address
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Teacher.create({
             name,
             TID,
@@ -91,6 +111,10 @@ exports.registerTec = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
+    // {
+    //     "name" : "somya" ,
+    //     "pass" : "1234567890"
+    //   }
     try {
         let {
             name,
@@ -119,6 +143,13 @@ exports.login = async (req, res, next) => {
     }
 };
 exports.addmarks = async (req, res, next) => {
+    // {
+    //     "name": "somya",
+    //     "reg": "098765",
+    //     "course": "alpha",
+    //     "marks": "1100"
+    // }
+
     try {
         let {
             name,
@@ -126,9 +157,6 @@ exports.addmarks = async (req, res, next) => {
             course,
             marks
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Marks.create({
             name,
             reg,
@@ -149,13 +177,13 @@ exports.addmarks = async (req, res, next) => {
     }
 };
 exports.fetchmarks = async (req, res, next) => {
+    // {
+    //     name : ""
+    // }
     try {
         let {
             name
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Marks.findOne({
             name: name
         });
@@ -179,6 +207,12 @@ exports.fetchmarks = async (req, res, next) => {
     }
 };
 exports.addattandence = async (req, res, next) => {
+    // {
+    //     "name": "somya",
+    //     "reg": "098765",
+    //     "date": "alpha",
+    //     "attendance": "10%"
+    // }
     try {
         let {
             name,
@@ -186,9 +220,6 @@ exports.addattandence = async (req, res, next) => {
             date,
             attandence
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Attandence.create({
             name,
             reg,
@@ -209,13 +240,13 @@ exports.addattandence = async (req, res, next) => {
     }
 };
 exports.fetchattandence = async (req, res, next) => {
+    // {
+    //     "name": "somya"
+    // }
     try {
         let {
             name
         } = req.body;
-        token = "";
-        tags = tags.toLowerCase();
-        tags = tags.split(",");
         const user = await Attandence.findOne({
             name: name
         });

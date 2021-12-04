@@ -11,12 +11,11 @@ const addAttendance = new mongoose.Schema({
         required: true
     },
     date: {
-        type: Date,
+        type: String,
         default: Date.now
     },
-    Attendance: {
-        type: String,
-        enum: ['Present', 'Absent']
+    attendance: {
+        type: String
     }
 })
 

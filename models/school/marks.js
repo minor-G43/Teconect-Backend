@@ -11,11 +11,10 @@ const addMarks = new mongoose.Schema({
 		required : true
 	},
 	course : {
-		type: String, 
-		enum: ['english','maths','science','social']
+		type: String
 	},
 	marks : {
-		type : Number,
+		type : String,
 		required : true
 	}
 })

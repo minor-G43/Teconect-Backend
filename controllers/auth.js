@@ -55,7 +55,7 @@ exports.register = async (req, res, next) => {
         })
         console.log("register success");
     } catch (error) {
-        next(error);
+        next(error.message);
     }
 };
 

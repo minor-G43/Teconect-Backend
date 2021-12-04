@@ -6,9 +6,12 @@ const addTeacher = new mongoose.Schema({
 		type : String,
 		required : true
 	},
-	TId : {
+	TID : {
 		type : String,
 		required : true
+	},
+	fanme: {
+		type : String
 	},
 	pass :{
 		type : String,
@@ -24,7 +27,6 @@ const addTeacher = new mongoose.Schema({
 	},
 	gender : {
 		type: String, 
-		enum: ['male','female','other']
 	},
 	course : {
 		type : String,

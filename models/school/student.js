@@ -30,7 +30,6 @@ const addStudent = new mongoose.Schema({
     },
     gender: {
         type: String,
-        enum: ['male', 'female', 'other']
     },
     cls: {
         type: String,
