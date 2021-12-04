@@ -158,10 +158,10 @@ exports.addmarks = async (req, res, next) => {
             marks
         } = req.body;
         const user = await Marks.create({
-            name,
-            reg,
-            course,
-            marks
+            name : name,
+            reg : reg,
+            course : course,
+            marks : marks
         });
         console.log(user);
         res.status(201).send({
@@ -221,10 +221,10 @@ exports.addattandence = async (req, res, next) => {
             attandence
         } = req.body;
         const user = await Attandence.create({
-            name,
-            reg,
-            date,
-            attandence
+            name : name,
+            reg : reg,
+            date : date,
+            attandence :attandence
         });
         console.log(user);
         res.status(201).send({
